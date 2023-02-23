@@ -27,7 +27,7 @@ def load_wildfire_data_local_csv():
     df = pd.read_csv('dataset/wildfire_data.csv')
     df['incident'] = 1
     df['datetime'] = pd.to_datetime(df['date'])
-    df['date'] = pd.to_datetime(df['date'].dt.date)
+    df['date'] = pd.to_datetime(df['datetime'].dt.date)
 
     return df
 
@@ -128,3 +128,27 @@ def precompute_values_lists_weather(df):
     print(df['region'])
 
     return list_states
+
+
+# @st.cache_data
+def load_descriptions_shared():
+    with open('input/descr_shared_data.json','r') as f:
+        shared_dict = json.loads(f.read())
+
+    return shared_dict
+
+
+# @st.cache_data
+def load_descriptions_wildfire():
+    with open('input/descr_wildfire_data.json','r') as f:
+        main_dict = json.loads(f.read())
+
+    return main_dict
+
+
+# @st.cache_data
+def load_descriptions_weather():
+    with open('input/descr_weather_data.json','r') as f:
+        main_dict = json.loads(f.read())
+
+    return main_dict

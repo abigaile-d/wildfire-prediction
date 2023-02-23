@@ -1,0 +1,12 @@
+{
+    "header": [
+        "The aim of this project is to predict risks of wildfires based on various factors (e.g. weather data), which can help in the monitoring, triaging and prevention of large wildfires."
+    ],
+    "caption": [
+        "This project is ongoing and more features will be added in the future."
+    ],
+    "fire_size_class_legend": "In acres:  \n**A**: 0.+ - 0.25  \n**B**: 0.26 - 9.9   \n**C**: 10.0 - 99.9  \n**D**: 100 - 299  \n**E**: 300 - 999  \n**F**: 1000 - 4999  \n**G**: 5000+",
+    "charts": {
+        "label": "Comments / Observations"
+    }
+}

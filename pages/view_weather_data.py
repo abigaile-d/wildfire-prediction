@@ -7,26 +7,26 @@ import altair as alt
 import utils
 
 # load data and vars
-wildfire_df = utils.load_wildfire_data_gcp()
+wildfire_df = utils.load_wildfire_data_local_csv()
 weather_df = utils.load_weather_data_local_csv()
 list_fire_size_classes, _, list_years, list_causes = utils.precompute_values_lists(wildfire_df)
 max_fire_size, min_date, max_date = utils.precompute_values_ranges(wildfire_df)
 fire_size_class_range = utils.get_fire_size_class_range(max_fire_size)
 
 list_states = utils.precompute_values_lists_weather(weather_df)
+descr_dict = utils.load_descriptions_weather()
+shared_descr_dict = utils.load_descriptions_shared()
 
 # tile and short background
 st.title("Weather and Wildfire Data")
 st.sidebar.header("Weather and Wildfire Data")
 st.sidebar.subheader("Background:")
-st.sidebar.markdown("The weather data used in this project is from **\"Visual Crossing Weather API\"** \
-    [[Webpage]](https://www.visualcrossing.com/weather-api). Historical daily weather data were queried \
-    for each U.S. state location via API. The wildfire data comes from the same Kaggle dataset as \
-    mentioned in the previous page.")
-st.sidebar.markdown("This page shows the relationship between wildfire incidents and different weather conditions.")
-st.sidebar.markdown("The aim of this project is to predict risks of wildfires based on various \
-    factors (e.g. weather data), which can help in the monitoring, triaging and prevention of large wildfires.")
-st.sidebar.caption("This project is ongoing and more features will be added in the future.")
+for descr in descr_dict['header']:
+    st.sidebar.markdown(descr)
+for descr in shared_descr_dict['header']:
+    st.sidebar.markdown(descr)
+for descr in shared_descr_dict['caption']:
+    st.sidebar.caption(descr)
 
 # define forms
 st.markdown("Use the following widgets to filter the data used in below charts:")
@@ -37,9 +37,7 @@ choice_fire_size_min, choice_fire_size_max = left_col.slider("Filter by Fire Siz
     min_value=fire_size_class_range[choice_fire_class_min][0], max_value=fire_size_class_range[choice_fire_class_max][1], \
     value=(fire_size_class_range[choice_fire_class_min][0], fire_size_class_range[choice_fire_class_max][1]))
 expander = right_col.expander("See Fire Size Class Legend")
-expander.markdown("In acres:  \n**A**: 0.+ - 0.25  \n**B**: 0.26 - 9.9   \n**C**: 10.0 - 99.9  \n" \
-    "**D**: 100 - 299  \n**E**: 300 - 999  \n**F**: 1000 - 4999  \n**G**: 5000+")
-
+expander.markdown(shared_descr_dict["fire_size_class_legend"])
 
 choice_state = st.selectbox("Filter by U.S. State:", np.hstack(('All', list_states)))
 st.caption("Note: Limited U.S. states being shown as data is not yet complete due to API query limitations.")
@@ -97,47 +95,13 @@ chart2 = alt.Chart(tmp_df, width=600, height=50).mark_area().encode(
 )
 st.altair_chart(alt.vconcat(chart1, chart2), use_container_width=True)
 
-desc = dict()
-desc['All'] = "Observations about individual states will be displayed if a state was selected in the \
-    options above."
-desc['CA'] = "There is an obvious correlation between temperatures and wildfire incidents in CA, \
-    which is what would have been expected. More wildfires occur during California summer months."
-desc['TX'] = "The months with most wildfires in Texas are January to March, and August. \
-    August is the hottest month in Texas, but January to March relatively colder. More analysis is needed \
-    to understand why more wildfires happen during the winter months in Texas."
-expander = st.expander("Comments / Observations")
-expander.markdown("In general, the months of February to April have the most wildfire incidents, \
-    even though the average temperatures during these months are lower.  More thorough \
-    analysis needed to know why this is the case. \n \
-    \n **{}:** {}".format(choice_state, desc[choice_state]))
+expander = st.expander(shared_descr_dict["charts"]["label"])
+expander.markdown(descr_dict["charts"]["month"]["overview"].format(choice_state, descr_dict["charts"]["month"][choice_state]))
 
 
 # display
 st.header("Data Distribution on Weather Measurements")
 tabs = st.tabs(["Temperature", "Dew Point", "Humidity", "Precipitation Probability", "Wind Speed", "Pressure", "Cloud Cover", "UV Index"])
-
-desc = dict()
-desc['temp'] = ("The temperature values are from the average temperature for the day.",
-    "On all fire size classes, more wildfires seem to occur on higher temperatures, and less on lower temperatures. \
-    Larger wildfires also tend to happen at higher temperatures than smaller ones, on average.")
-desc['dew'] = ("Dew point is the temperature to which air must be cooled for the water vapor in it \
-    to condense into dew or frost.", 
-    "More wildfires seem to occur on slightly higher dew points.")
-desc['humidity'] = ("Humidity is the amount of water vapor in the air.", 
-    "Lower humidity seems to cause more wildfires, and less wildfires happen on highly humid days.")
-desc['precipprob'] = ("Precipitation Probability is the likelihood of measurable precipitation ranging from 0% to 100%.", 
-    "More wildfires seem to occur on days with lower precipitation probability.")
-desc['windspeed'] = ("Wind Speed is the maximum hourly average sustained wind speed value for the day.", 
-    "Although wind speed does not seem to have a significant effect on small wildfires, faster wind speed seems to cause \
-    bigger wildfires.")
-desc['pressure'] = ("Pressure is the sea level atmospheric or barometric pressure in millibars (or hectopascals).", 
-    "More and bigger wildfires seem to occur on days with lower pressure.")
-desc['cloudcover'] = ("Cloud cover is how much of the sky is covered in clouds ranging from 0-100%.", 
-    "More wildfires seem to occur on less cloudy days.")
-desc['uvindex'] = ("UX Index is a value between 0 (=no exposure) and 10 (=high) indicating the level of \
-    ultraviolet (UV) exposure for that day.", 
-    "Although there are still many wildfires occurring during low UV days, high UV days seems to have been a factor in \
-    causing more wildfires.")
 
 i = 0
 col_width = 100 * (len(list_fire_size_classes) + 1) / len(merged_df['fire_size_class'].sort_values().unique()) - 15
@@ -179,7 +143,7 @@ for col in ['temp', 'dew', 'humidity', 'precipprob', 'windspeed', 'pressure', 'c
 
         st.altair_chart(chart)
 
-        expander = st.expander("Comments / Observations")
-        expander.markdown("{}  \n \n {}".format(desc[col][0], desc[col][1]))
+        expander = st.expander(shared_descr_dict["charts"]["label"])
+        expander.markdown(descr_dict["charts"]["weather_measure"][col])
 
     i = i + 1
