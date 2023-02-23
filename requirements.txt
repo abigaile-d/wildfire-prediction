@@ -1,0 +1,8 @@
+altair==4.2.0
+db-dtypes==1.0.5
+google-auth==2.16.1
+google-cloud-bigquery==3.5.0
+pandas==1.5.2
+pysqlite3==0.5.0
+SQLAlchemy==1.4.46
+streamlit==1.18.1

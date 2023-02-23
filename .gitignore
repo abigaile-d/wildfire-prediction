@@ -1,1 +1,6 @@
-input/
+.DS_Store
+__pycache__/
+.streamlit/
+dataset/
+helpers/
+test.py

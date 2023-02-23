@@ -7,8 +7,8 @@ import altair as alt
 import utils
 
 # load data and vars
-wildfire_df = utils.load_wildfire_data()
-weather_df = utils.load_weather_data()
+wildfire_df = utils.load_wildfire_data_gcp()
+weather_df = utils.load_weather_data_local_csv()
 list_fire_size_classes, _, list_years, list_causes = utils.precompute_values_lists(wildfire_df)
 max_fire_size, min_date, max_date = utils.precompute_values_ranges(wildfire_df)
 fire_size_class_range = utils.get_fire_size_class_range(max_fire_size)
@@ -50,7 +50,7 @@ choice_date_to = right_col.date_input("", min_value=choice_date_from, max_value=
 choice_cause = st.multiselect("Cause of Fire:", list_causes, default=list_causes)
 
 # filter data based on form inputs
-wildfire_df = wildfire_df[['date', 'year', 'state', 'fire_size_class', 'stat_cause', 'fire_size', 'incident']]
+wildfire_df = wildfire_df[['date', 'region', 'fire_size_class', 'stat_cause', 'fire_size', 'incident']]
 if choice_fire_class_min != 'A' or choice_fire_class_max != 'G':
     wildfire_df = wildfire_df.loc[(wildfire_df['fire_size_class'] >= choice_fire_class_min) & \
         (wildfire_df['fire_size_class'] <= choice_fire_class_max)]
@@ -59,12 +59,12 @@ if choice_fire_size_min > 0 or choice_fire_size_max < max_fire_size:
         (wildfire_df['fire_size'] < choice_fire_size_max)]
 
 if choice_state != 'All':
-    wildfire_df = wildfire_df.loc[wildfire_df['state'] == choice_state]
-    weather_df = weather_df.loc[weather_df['state'] == choice_state]
+    wildfire_df = wildfire_df.loc[wildfire_df['region'] == choice_state]
+    weather_df = weather_df.loc[weather_df['region'] == choice_state]
 
 if choice_year != 'All':
     choice_year = int(choice_year)
-    wildfire_df = wildfire_df.loc[wildfire_df['year'] == choice_year]
+    wildfire_df = wildfire_df.loc[wildfire_df['date'].dt.year == choice_year]
     weather_df = weather_df.loc[weather_df.date.dt.year == choice_year]
 else:
     wildfire_df = wildfire_df.loc[(wildfire_df['date'].dt.date >= choice_date_from) & (wildfire_df['date'].dt.date <= choice_date_to)]
@@ -140,7 +140,7 @@ desc['uvindex'] = ("UX Index is a value between 0 (=no exposure) and 10 (=high) 
     causing more wildfires.")
 
 i = 0
-col_width = 75 * (len(list_fire_size_classes) + 1) / len(merged_df['fire_size_class'].sort_values().unique()) - 15
+col_width = 100 * (len(list_fire_size_classes) + 1) / len(merged_df['fire_size_class'].sort_values().unique()) - 15
 for col in ['temp', 'dew', 'humidity', 'precipprob', 'windspeed', 'pressure', 'cloudcover', 'uvindex']:
     tmp_df = merged_df[['date', 'fire_size_class',  'stat_cause', col]]
     with tabs[i]:
