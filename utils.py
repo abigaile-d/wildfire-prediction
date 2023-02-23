@@ -40,7 +40,7 @@ def load_wildfire_data_gcp():
     )
     client = bigquery.Client(credentials=credentials)
 
-    query_job = client.query("SELECT * FROM `vernal-shine-239106.US_Wildfire_Dataset.wildfire`")
+    query_job = client.query("SELECT * FROM `vernal-shine-239106.US_Wildfire_Dataset.wildfire` LIMIT 1000")
     df = (query_job.result().to_dataframe())
     
     df['incident'] = 1
