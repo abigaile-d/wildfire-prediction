@@ -3,7 +3,7 @@ import pandas as pd
 import glob
 import json
 
-import sqlite3
+# import sqlite3
 from google.oauth2 import service_account
 from google.cloud import bigquery
 
@@ -40,7 +40,7 @@ def load_wildfire_data_gcp():
     )
     client = bigquery.Client(credentials=credentials)
 
-    query_job = client.query("SELECT * FROM `vernal-shine-239106.US_Wildfire_Dataset.wildfire` LIMIT 1000")
+    query_job = client.query("SELECT * FROM `vernal-shine-239106.US_Wildfire_Dataset.wildfire` LIMIT 10")
     df = (query_job.result().to_dataframe())
     
     df['incident'] = 1
