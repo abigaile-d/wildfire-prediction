@@ -3,20 +3,19 @@ import streamlit as st
 import glob
 import numpy as np
 import altair as alt
-import pandas as pd
 
 import utils
 
 # load data and vars
-client = utils.connect_gcp()
-wildfire_df = utils.load_wildfire_data_gcp(client)
-weather_df = utils.load_weather_data_gcp(client)
+#client = utils.connect_gcp()
+wildfire_df = utils.load_wildfire_data_local_csv()
+weather_df = utils.load_weather_data_local_csv(filename='input/weather_data.csv')
 list_fire_size_classes, _, list_years, list_causes = utils.get_wildfire_lists(wildfire_df)
 max_fire_size, min_date, max_date = utils.get_wildfire_ranges(wildfire_df)
 fire_size_class_range = utils.get_wildfire_size_class_range(max_fire_size)
 
 list_states = utils.get_weather_lists(weather_df)
-descr_dict = utils.load_descriptions_weather()
+descr_dict = utils.load_descriptions_weather(filename='input/descr_weather_data_vcross.json')
 shared_descr_dict = utils.load_descriptions_shared()
 
 # tile and short background
@@ -42,6 +41,7 @@ expander = right_col.expander("See Fire Size Class Legend")
 expander.markdown(shared_descr_dict["fire_size_class_legend"])
 
 choice_state = st.selectbox("Filter by U.S. State:", np.hstack(('All', list_states)))
+st.caption("Note: Limited U.S. states being shown as data is not yet complete due to API query limitations.")
 choice_year = st.radio("Filter by Year:", np.hstack((list_years, 'All')), index=len(list_years), horizontal=True)
 left_col, right_col = st.columns(2)
 choice_date_from = left_col.date_input("Filter by Date Range:", min_value=min_date, max_value=max_date, value=min_date, disabled=(choice_year != 'All'))
@@ -71,18 +71,16 @@ else:
 
 wildfire_df = wildfire_df.loc[wildfire_df['stat_cause'].isin(choice_cause)]
 
+
 # merge the weather dataframe with the wildfire dataframe
 merged_df = weather_df.merge(wildfire_df, how='left')
 merged_df[['fire_size', 'incident']] = merged_df[['fire_size', 'incident']].fillna(0)
 merged_df[['fire_size_class', 'stat_cause']] = merged_df[['fire_size_class', 'stat_cause']].fillna('No Fire')
-# merged_df.fillna(0, inplace=True)
-merged_df.sort_values(by=['date', 'region', 'fire_size_class'], inplace=True)
-merged_df.drop(columns=['fire_size', 'stat_cause'], inplace=True)
-merged_df.drop_duplicates(subset=['date', 'region'], keep='last', inplace=True)
+merged_df.fillna(0, inplace=True)
 
 # display temperatures and wildfires by month of year
 st.header("Temperature vs. Wildfires by Month of Year")
-tmp_df = weather_df[['date', 'temp', 'min_temp', 'max_temp']]
+tmp_df = weather_df[['date', 'temp', 'tempmin', 'tempmax']]
 tmp_df['date_month'] = tmp_df.date.dt.month
 chart1 = alt.Chart(tmp_df, width=600, height=200).mark_boxplot(extent='min-max').encode(
     x='date_month:O',
@@ -99,25 +97,17 @@ chart2 = alt.Chart(tmp_df, width=600, height=50).mark_area().encode(
 st.altair_chart(alt.vconcat(chart1, chart2), use_container_width=True)
 
 expander = st.expander(shared_descr_dict["charts"]["label"])
-if choice_state in descr_dict["charts"]["month"]:
-    expander.markdown('{} \n\n {}'.format(descr_dict["charts"]["month"]["overview"], descr_dict["charts"]["month"][choice_state]))
-else:
-    expander.markdown(descr_dict["charts"]["month"]["overview"])
+expander.markdown(descr_dict["charts"]["month"]["overview"].format(choice_state, descr_dict["charts"]["month"][choice_state]))
 
 
 # display
-st.header("Weather Measurements & Data Distribution")
-tabs = st.tabs(["Temperature", "Dew Point", "Sea Level Pressure", "Max Sustained Wind"])
-col_list = ['temp', 'dew_point', 'sea_level_pressure', 'max_sustained_wind']
-
-if len(merged_df.index) > len(weather_df.index) * 0.2:
-    merged_df = merged_df.sample(int(len(weather_df.index) * 0.2))
+st.header("Data Distribution on Weather Measurements")
+tabs = st.tabs(["Temperature", "Dew Point", "Humidity", "Precipitation Probability", "Wind Speed", "Pressure", "Cloud Cover", "UV Index"])
 
 i = 0
 col_width = 100 * (len(list_fire_size_classes) + 1) / len(merged_df['fire_size_class'].sort_values().unique()) - 15
-for col in col_list:
-    tmp_df = merged_df[['date', 'fire_size_class', col]]
-
+for col in ['temp', 'dew', 'humidity', 'precipprob', 'windspeed', 'pressure', 'cloudcover', 'uvindex']:
+    tmp_df = merged_df[['date', 'fire_size_class',  'stat_cause', col]]
     with tabs[i]:
         scale_range = (min(tmp_df[col]), max(tmp_df[col]))
         
@@ -155,55 +145,6 @@ for col in col_list:
         st.altair_chart(chart)
 
         expander = st.expander(shared_descr_dict["charts"]["label"])
-        expander.markdown(descr_dict["charts"]["weather_measures"][col])
-
-    i = i + 1
-
-st.header("Weather Conditions & Data Distribution")
-tabs = st.tabs(["Fog", "Rain/Drizzle",  "Thunder", "Tornado/Funnel Cloud"])
-col_list = ['fog', 'rain_drizzle', 'thunder', 'tornado_funnel_cloud']
-
-i = 0
-col_width = 100 * (len(list_fire_size_classes) + 1) / len(merged_df['fire_size_class'].sort_values().unique()) - 15
-for col in col_list:
-    tmp_df = merged_df[['date', 'fire_size_class', col]] 
-    with tabs[i]:
-        scale_range = (min(tmp_df[col]), max(tmp_df[col]))
-        
-        violins =  alt.Chart().transform_density(
-            col, 
-            as_=[col, 'density'], 
-            groupby=['fire_size_class']
-        ).mark_area(orient='horizontal').encode(
-            x=alt.X('density:Q', 
-                    stack='center', 
-                    impute=None, 
-                    title=None,
-                    axis=alt.Axis(labels=False, 
-                                  values=[0], 
-                                  grid=False, 
-                                  ticks=False)),
-            y=alt.Y(col + ':Q', 
-                    scale=alt.Scale(domain=[scale_range[0], scale_range[1]])),
-            color=alt.Color('fire_size_class:N', 
-                            legend=None)
-        )
-
-        chart = alt.layer(
-            violins,
-            alt.Chart().mark_rule(clip=False).encode(
-                y='mean('+col+'):Q',
-                color=alt.value('black')),
-        ).properties(
-            width=col_width
-        ).facet(
-            data=tmp_df,
-            column=alt.Column('fire_size_class:N')
-        )
-
-        st.altair_chart(chart)
-
-        expander = st.expander(shared_descr_dict["charts"]["label"])
-        expander.markdown(descr_dict["charts"]["weather_conditions"][col])
+        expander.markdown(descr_dict["charts"]["weather_measure"][col])
 
     i = i + 1

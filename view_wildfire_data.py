@@ -9,10 +9,12 @@ import utils  # saved shared functions in utils
 
 
 # load data and vars
-wildfire_df = utils.load_wildfire_data_local_csv()
-list_fire_size_classes, list_states, list_years, list_causes = utils.precompute_values_lists(wildfire_df)
-max_fire_size, min_date, max_date = utils.precompute_values_ranges(wildfire_df)
-fire_size_class_range = utils.get_fire_size_class_range(max_fire_size)
+client = utils.connect_gcp()
+wildfire_df = utils.load_wildfire_data_gcp(client)
+list_fire_size_classes, list_states, list_years, list_causes = utils.get_wildfire_lists(wildfire_df)
+max_fire_size, min_date, max_date = utils.get_wildfire_ranges(wildfire_df)
+fire_size_class_range = utils.get_wildfire_size_class_range(max_fire_size)
+
 descr_dict = utils.load_descriptions_wildfire()
 shared_descr_dict = utils.load_descriptions_shared()
 if(list_fire_size_classes[0] == 'A'):

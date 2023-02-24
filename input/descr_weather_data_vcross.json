@@ -1,0 +1,24 @@
+{
+    "header": [
+        "The weather data used in this project is from **\"Visual Crossing Weather API\"** [[Webpage]](https://www.visualcrossing.com/weather-api). Historical daily weather data were queried for each U.S. state location via API. The wildfire data comes from the same Kaggle dataset as mentioned in the previous page.",
+        "This page shows the relationship between wildfire incidents and different weather conditions."
+    ],
+    "charts": {
+        "month": {
+            "overview": "In general, the months of February to April have the most wildfire incidents, even though the average temperatures during these months are lower.  More thorough analysis needed to know why this is the case. \n\n **{}:** {}",
+            "All": "Observations about individual states will be displayed if a state was selected in the options above.",
+            "CA": "There is an obvious correlation between temperatures and wildfire incidents in CA, which is what would have been expected. More wildfires occur during California summer months.",
+            "TX": "The months with most wildfires in Texas are January to March, and August. August is the hottest month in Texas, but January to March relatively colder. More analysis is needed to understand why more wildfires happen during the winter months in Texas."
+        },
+        "weather_measure": {
+            "temp": "The temperature values are from the average temperature for the day. \n\n On all fire size classes, more wildfires seem to occur on higher temperatures, and less on lower temperatures. Larger wildfires also tend to happen at higher temperatures than smaller ones, on average.",
+            "dew": "Dew point is the temperature to which air must be cooled for the water vapor in it to condense into dew or frost. \n\n More wildfires seem to occur on slightly higher dew points.",
+            "humidity": "Humidity is the amount of water vapor in the air. \n\n Lower humidity seems to cause more wildfires, and less wildfires happen on highly humid days.",
+            "precipprob": "Precipitation Probability is the likelihood of measurable precipitation ranging from 0% to 100%. \n\n More wildfires seem to occur on days with lower precipitation probability.",
+            "windspeed": "Wind Speed is the maximum hourly average sustained wind speed value for the day. \n\n Although wind speed does not seem to have a significant effect on small wildfires, faster wind speed seems to cause bigger wildfires.",
+            "pressure": "Pressure is the sea level atmospheric or barometric pressure in millibars (or hectopascals). \n\n More and bigger wildfires seem to occur on days with lower pressure.",
+            "cloudcover": "Cloud cover is how much of the sky is covered in clouds ranging from 0-100%. \n\n More wildfires seem to occur on less cloudy days.",
+            "uvindex": "UX Index is a value between 0 (=no exposure) and 10 (=high) indicating the level of ultraviolet (UV) exposure for that day. \n\n Although there are still many wildfires occurring during low UV days, high UV days seems to have been a factor in causing more wildfires."
+        }
+    }
+}

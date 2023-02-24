@@ -3,3 +3,5 @@ __pycache__/
 .streamlit/
 dataset/
 helpers/
+input/*vcross.json
+pages/*vcross.py
