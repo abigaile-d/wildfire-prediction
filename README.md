@@ -1,4 +1,4 @@
-# wildfire-prediction
+# Wildfire Exploratory Data Analysis
 
 View in Streamlit: (https://abigaile-d-wildfire-prediction.streamlit.app/)
 
