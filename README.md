@@ -1,6 +1,6 @@
 # wildfire-prediction
 
-[View in Streamlit] (https://abigaile-d-wildfire-prediction.streamlit.app/)
+View in Streamlit: (https://abigaile-d-wildfire-prediction.streamlit.app/)
 
 This project is an Exploratory Data Analysis of U.S. wildfires and how weather can be a factor in prevalence or spread of it. The aim of this project is to predict risks of wildfires based on various factors (e.g. weather data), which can help in the monitoring, triaging and prevention of large wildfires.
 
