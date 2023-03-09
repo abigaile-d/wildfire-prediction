@@ -27,4 +27,4 @@ Clone the repository, and run the following commands:
     pip install -r requirements_full.txt
     streamlit run view_wildfire_data.py
 
-*Note: There is a separate requirements.txt and requirements_full.txt as the former is the only minimum packages needed by streamlit cloud.*
+*Note: There is a separate requirements.txt and requirements_full.txt as the former lists only the minimum packages needed by streamlit cloud.*
