@@ -1,2 +1,3 @@
+pandas=1.2.4
 google-cloud-bigquery==3.5.0
 db-dtypes==1.0.5
