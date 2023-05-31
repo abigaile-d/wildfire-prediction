@@ -108,7 +108,7 @@ st.header("Wildfire Incidents by Fire Size and U.S. State")
 st.write("Display by:")
 choice_display_fire = st.checkbox("Fire Size Class", value=True)
 choice_display_state = st.checkbox("U.S. State ", value=True)
-tmp_df = wildfire_df[['date', 'fire_size_class', 'region', 'incident', 'fire_size']]
+tmp_df = wildfire_df[['fire_size_class', 'region', 'incident', 'fire_size']]
 if choice_display_fire and choice_display_state:
     tmp_df2 = tmp_df.groupby(['region', 'fire_size_class']).sum().reset_index()
     st.dataframe(tmp_df2, use_container_width=True)
