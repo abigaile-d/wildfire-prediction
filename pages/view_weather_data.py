@@ -91,7 +91,7 @@ chart1 = alt.Chart(tmp_df, width=600, height=200).mark_boxplot(extent='min-max')
 
 tmp_df = wildfire_df[['date', 'incident', 'fire_size']]
 tmp_df['date_month'] = tmp_df.date.dt.month
-tmp_df = tmp_df.groupby('date_month').sum().reset_index()
+tmp_df = tmp_df.groupby('date_month').sum(numeric_only=True).reset_index()
 chart2 = alt.Chart(tmp_df, width=600, height=50).mark_area().encode(
     x='date_month:N',
     y='incident:Q'
