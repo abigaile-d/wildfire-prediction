@@ -95,7 +95,7 @@ left_col, right_col = st.columns(2)
 tmp_df = tmp_group.count()
 tmp_df.rename(columns={'fire_size':'fire count'}, inplace=True)
 left_col.line_chart(tmp_df)
-tmp_df = tmp_group.sum()
+tmp_df = tmp_group.sum(numeric_only=True)
 tmp_df.rename(columns={'fire_size':'fire size'}, inplace=True)
 right_col.line_chart(tmp_df)
 expander = st.expander(shared_descr_dict["charts"]["label"])
@@ -110,17 +110,17 @@ choice_display_fire = st.checkbox("Fire Size Class", value=True)
 choice_display_state = st.checkbox("U.S. State ", value=True)
 tmp_df = wildfire_df[['fire_size_class', 'region', 'incident', 'fire_size']]
 if choice_display_fire and choice_display_state:
-    tmp_df2 = tmp_df.groupby(['region', 'fire_size_class']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby(['region', 'fire_size_class']).sum(numeric_only=True).reset_index()
     st.dataframe(tmp_df2, use_container_width=True)
     tmp_df2 = tmp_df2.pivot(index='region', columns='fire_size_class', values='incident')
     st.bar_chart(tmp_df2)
 elif choice_display_fire:
-    tmp_df2 = tmp_df.groupby(['fire_size_class']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby(['fire_size_class']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.sort_values(by='incident', ascending=False)
     st.dataframe(tmp_df2, use_container_width=True)
     st.bar_chart(tmp_df2[['fire_size_class', 'incident']], x='fire_size_class')
 elif choice_display_state:
-    tmp_df2 = tmp_df.groupby(['region']).sum()
+    tmp_df2 = tmp_df.groupby(['region']).sum(numeric_only=True)
     tmp_df2 = tmp_df2.sort_values(by='incident', ascending=False)
     st.dataframe(tmp_df2, use_container_width=True)
     st.bar_chart(tmp_df2[['incident']])
@@ -133,8 +133,8 @@ if choice_display_fire or choice_display_state:
 st.markdown("Percentage distribution of fire occurrences based on fire size class and U.S. state:")
 left_col, right_col = st.columns(2)
 if choice_display_fire:
-    tmp_df2 = tmp_df.groupby(['fire_size_class']).sum().reset_index()
-    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum() * 100
+    tmp_df2 = tmp_df.groupby(['fire_size_class']).sum(numeric_only=True).reset_index()
+    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum(numeric_only=True) * 100
     tmp_df2['incident'] = tmp_df2['incident'].round(decimals=2)
     chart = alt.Chart(tmp_df2).mark_arc(innerRadius=50, outerRadius=110).encode(
         theta=alt.Theta(field="incident", type="quantitative", title="% of occurence"),
@@ -143,8 +143,8 @@ if choice_display_fire:
     left_col.altair_chart(chart, use_container_width=True)
 
 if choice_display_state:
-    tmp_df2 = tmp_df.groupby(['region']).sum().reset_index()
-    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum() * 100
+    tmp_df2 = tmp_df.groupby(['region']).sum(numeric_only=True).reset_index()
+    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum(numeric_only=True) * 100
     tmp_df2['incident'] = tmp_df2['incident'].round(decimals=2)
     chart = alt.Chart(tmp_df2).mark_arc(innerRadius=50, outerRadius=110).encode(
         theta=alt.Theta(field="incident", type="quantitative", title="% of occurence"),
@@ -160,7 +160,7 @@ if choice_display_fire or choice_display_state:
 tmp_df = wildfire_df[['date', 'fire_size_class', 'region', 'incident', 'fire_size']]
 if choice_display_fire:
     st.subheader("By Fire Size and Year")
-    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'fire_size_class']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'fire_size_class']).sum(numeric_only=True).reset_index()
     print(tmp_df2)
     tmp_df2 = tmp_df2.pivot(index='date', columns='fire_size_class', values='incident')
     st.bar_chart(tmp_df2)
@@ -172,13 +172,13 @@ if choice_display_fire:
 
 if choice_display_state:
     st.subheader("By U.S. State and Year")
-    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'region']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'region']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.pivot(index='date', columns='region', values='incident')
     st.bar_chart(tmp_df2)
     if choice_year == 'All':
         if choice_state == 'All':
             st.write("Displaying Top 5 U.S. States with Most Fires")
-            top_states = tmp_df[['region', 'incident']].groupby('region').sum()
+            top_states = tmp_df[['region', 'incident']].groupby('region').sum(numeric_only=True)
             top_states = top_states.sort_values(by='incident').index[-5::].values 
             st.line_chart(tmp_df2.loc[:, top_states])
         else:
@@ -209,11 +209,11 @@ if len(choice_cause) > 0:
     # summary
     tmp_df = wildfire_df[['date', 'fire_size_class', 'region', 'stat_cause', 'incident']]
     tmp_df = tmp_df.loc[tmp_df['stat_cause'].isin(choice_cause)]
-    tmp_df2 = tmp_df.groupby(['stat_cause']).sum()
+    tmp_df2 = tmp_df.groupby(['stat_cause']).sum(numeric_only=True)
     st.bar_chart(tmp_df2[['incident']])
 
     _, mid_col, _ = st.columns((2,4,1))
-    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum() * 100
+    tmp_df2['incident'] = tmp_df2['incident'] / tmp_df2['incident'].sum(numeric_only=True) * 100
     tmp_df2['incident'] = tmp_df2['incident'].round(decimals=2)
     chart = alt.Chart(tmp_df2.reset_index()).mark_arc(innerRadius=50, outerRadius=110).encode(
         theta=alt.Theta(field="incident", type="quantitative", title="% of occurence"),
@@ -221,7 +221,7 @@ if len(choice_cause) > 0:
     )
     mid_col.altair_chart(chart)
 
-    tmp_df2 = tmp_df.groupby(['region', 'stat_cause']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby(['region', 'stat_cause']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.pivot(index='stat_cause', columns='region', values='incident')
 
     expander = st.expander(shared_descr_dict["charts"]["label"])
@@ -229,12 +229,12 @@ if len(choice_cause) > 0:
 
     # and by yearly trend
     st.subheader("By Cause and Year")
-    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'stat_cause']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'stat_cause']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.pivot(index='date', columns='stat_cause', values='incident')
     st.bar_chart(tmp_df2)
     if choice_year == 'All':
         st.write("Displaying Trends in the Top 5 Causes of Fires")
-        top_causes = tmp_df[['stat_cause', 'incident']].groupby('stat_cause').sum()
+        top_causes = tmp_df[['stat_cause', 'incident']].groupby('stat_cause').sum(numeric_only=True)
         top_causes = top_causes.sort_values(by='incident').index[-5::].values 
         st.line_chart(tmp_df2.loc[:, top_causes])
 
@@ -243,14 +243,14 @@ if len(choice_cause) > 0:
 
     # and by fire size
     st.subheader("By Cause and Fire Size")
-    tmp_df2 = tmp_df.groupby(['fire_size_class', 'stat_cause']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby(['fire_size_class', 'stat_cause']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.pivot(index='stat_cause', columns='fire_size_class', values='incident')
     st.bar_chart(tmp_df2)
 
     top_fire_class = choice_fire_class_max
     st.markdown("Displaying % Causes in the Largest Fire Size Class: " + top_fire_class)
     _, mid_col, _ = st.columns((2,4,1))
-    tmp_df2[top_fire_class] = tmp_df2[top_fire_class] / tmp_df2[top_fire_class].sum() * 100
+    tmp_df2[top_fire_class] = tmp_df2[top_fire_class] / tmp_df2[top_fire_class].sum(numeric_only=True) * 100
     tmp_df2[top_fire_class] = tmp_df2[top_fire_class].round(decimals=2)
     chart = alt.Chart(tmp_df2[top_fire_class].reset_index()).mark_arc(innerRadius=50, outerRadius=110).encode(
         theta=alt.Theta(field=top_fire_class, type="quantitative", title="% of occurence"),
@@ -263,7 +263,7 @@ if len(choice_cause) > 0:
 
     # and by U.S. state
     st.subheader("By Cause and U.S. State")
-    tmp_df2 = tmp_df.groupby(['region', 'stat_cause']).sum().reset_index()
+    tmp_df2 = tmp_df.groupby(['region', 'stat_cause']).sum(numeric_only=True).reset_index()
     tmp_df2 = tmp_df2.pivot(index='region', columns='stat_cause', values='incident')
     st.bar_chart(tmp_df2)
 
@@ -272,7 +272,7 @@ if len(choice_cause) > 0:
 
     st.markdown("Displaying % States of Wildfires Caused by: " + top_causes[-1])
     _, mid_col, _ = st.columns((2,4,1))
-    tmp_df2[top_causes[0]] = tmp_df2[top_causes[0]] / tmp_df2[top_causes[0]].sum() * 100
+    tmp_df2[top_causes[0]] = tmp_df2[top_causes[0]] / tmp_df2[top_causes[0]].sum(numeric_only=True) * 100
     tmp_df2[top_causes[0]] = tmp_df2[top_causes[0]].round(decimals=2)
     chart = alt.Chart(tmp_df2[top_causes[0]].reset_index()).mark_arc(innerRadius=50, outerRadius=110).encode(
         theta=alt.Theta(field=top_causes[0], type="quantitative", title="% of occurence"),
