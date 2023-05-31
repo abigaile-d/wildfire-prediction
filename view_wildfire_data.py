@@ -157,6 +157,7 @@ if choice_display_fire or choice_display_state:
     expander.markdown(descr_dict[chart_key_alt]["region_and_size_perc"])
 
 # display per fire size and year
+tmp_df = wildfire_df[['fire_size_class', 'region', 'incident', 'fire_size']]
 if choice_display_fire:
     st.subheader("By Fire Size and Year")
     tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'fire_size_class']).sum().reset_index()
