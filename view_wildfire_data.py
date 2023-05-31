@@ -161,6 +161,7 @@ tmp_df = wildfire_df[['date', 'fire_size_class', 'region', 'incident', 'fire_siz
 if choice_display_fire:
     st.subheader("By Fire Size and Year")
     tmp_df2 = tmp_df.groupby([tmp_df.date.dt.year, 'fire_size_class']).sum().reset_index()
+    print(tmp_df2)
     tmp_df2 = tmp_df2.pivot(index='date', columns='fire_size_class', values='incident')
     st.bar_chart(tmp_df2)
     if choice_year == 'All':
